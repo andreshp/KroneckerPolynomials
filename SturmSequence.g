@@ -1,5 +1,14 @@
+#########################################
+# SturmSequence(p)
+# returns the sturm sequence of the polynomial p
+#########################################
 SturmSequence := function(p)
     local sst;
+
+    if not(IsUnivariatePolynomial(p)) then
+      Error("The argument must be a polynomial in one variable");
+    fi;
+
     sst := [p, Derivative(p)];
     while Degree(sst[Length(sst)]) >= 1 do
         Add(sst, -QuotientRemainder(sst[Length(sst)-1],sst[Length(sst)])[2]);
@@ -7,8 +16,20 @@ SturmSequence := function(p)
     return sst;
 end;
 
+#########################################
+# SemigroupPolynomial(s,x)
+# Counts the number of roots of an univariate polynomial in the given interval.
+# It uses the sturm sequence.
+#########################################
 NumberOfRootsOfUnivariatePolynomialInInterval := function(p,a,b)
-    local sst, sgnc, valuesa, valuesb;
+    local sst, sgnc, valuesa, valuesb, psf;
+
+    if not(IsUnivariatePolynomial(p)) then
+        Error("The argument must be a polynomial in one variable");
+    fi;
+
+    # Take the largest square free divisor.
+    psf:=p/Gcd(p,Derivative(p));
 
     sgnc := function(numbers)
         local i, n, current_sign, new_sign, numbers_nozeros, count;
@@ -28,10 +49,8 @@ NumberOfRootsOfUnivariatePolynomialInInterval := function(p,a,b)
     end;
 
     sst := SturmSequence(p);
-    valuesa := List(sst, p -> Value(p, a));
-    valuesb := List(sst, p -> Value(p, b));
-    Print(valuesa);
-    Print(valuesb);
+    valuesa := List(sst, psf -> Value(psf, a));
+    valuesb := List(sst, psf -> Value(psf, b));
 
     return sgnc(valuesa) - sgnc(valuesb);
 end;

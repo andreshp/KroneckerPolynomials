@@ -1,34 +1,45 @@
+#########################################
+# bound(p)
+# Bound for Pieter's algorithm
+#########################################
 bound:=function(p)
-  local d,p21,p1;
+    local d,p21,p1;
 
-  d:= DegreeOfUnivariateLaurentPolynomial(p);
-  p21:=Value(Derivative(Derivative(p)),1);
-  p1:=Value(p,1);
-  return CeilingOfRational((12*p21/p1-3*d^2+6*d)/d);
+    d:= DegreeOfUnivariateLaurentPolynomial(p);
+    p21:=Value(Derivative(Derivative(p)),1);
+    p1:=Value(p,1);
+    return CeilingOfRational((12*p21/p1-3*d^2+6*d)/d);
 end;
 
-isKroneckerpieter:=function(p)
-  local d, b,f,gd,x;
-  f:=p;
-  x:=IndeterminateOfLaurentPolynomial(f);
-  d:=2;
-  while true do
-    b:=bound(f);
-    if d>b then
-      return false;
-    fi;
+#########################################
+# isKroneckerPieter(p)
+# Checks whether a polyonmial is Kronecker or not
+#########################################
+isKroneckerPieter:=function(p)
+    local d, b,f,gd,x;
+    f:=p;
+    x:=IndeterminateOfLaurentPolynomial(f);
+    d:=2;
+    while true do
+        b:=bound(f);
+        if d>b then
+            return false;
+        fi;
     gd:=Gcd(f,x^d-1);
     if IsZero(f-gd) then
-      return true;
+        return true;
     fi;
     if IsOne(gd) then
-      d:=d+1;
+        d:=d+1;
     fi;
     f:=f/gd;
   od;
 end;
 
-
+#########################################
+# SturmSequence(p)
+# returns the sturm sequence of the polynomial p
+#########################################
 SturmSequence := function(p)
     local sst;
 
@@ -43,12 +54,17 @@ SturmSequence := function(p)
     return sst;
 end;
 
+#########################################
+# SemigroupPolynomial(s,x)
+# Counts the number of roots of an univariate polynomial in the given interval.
+# It uses the sturm sequence.
+#########################################
 NumberOfRootsOfUnivariatePolynomialInInterval := function(p,a,b)
     local sst, sgnc, valuesa, valuesb, psf;
 
-   if not(IsUnivariatePolynomial(p)) then
-     Error("The argument must be a polynomial in one variable");
-   fi;
+    if not(IsUnivariatePolynomial(p)) then
+        Error("The argument must be a polynomial in one variable");
+    fi;
 
     # Take the largest square free divisor.
     psf:=p/Gcd(p,Derivative(p));
@@ -78,129 +94,140 @@ NumberOfRootsOfUnivariatePolynomialInInterval := function(p,a,b)
 end;
 
 
-isKroneckersturm:=function(p)
-  local n, x, y, cf, A, psf;
+#########################################
+# isKroneckerPieter(p)
+# Checks whether a polyonmial is Kronecker or not.
+# It uses the sturm's algorithm to count roots along with a variable's change
+# in order to count the roots in the unit circle.
+#########################################
+isKroneckerSturm:=function(p)
+    local n, x, y, cf, A, psf;
 
-  if not(IsUnivariatePolynomial(p)) then
-    Error("The argument must be a polynomial in one variable");
-  fi;
+    if not(IsUnivariatePolynomial(p)) then
+        Error("The argument must be a polynomial in one variable");
+    fi;
 
-  if IsZero(p) then
-    return false;
-  fi;
+    if IsZero(p) then
+        return false;
+    fi;
 
-  # Take the largest square free divisor.
-  psf:=p/Gcd(p,Derivative(p));
-  x:=IndeterminateOfLaurentPolynomial(p);
+    # Take the largest square free divisor.
+    psf:=p/Gcd(p,Derivative(p));
+    x:=IndeterminateOfLaurentPolynomial(p);
 
-  # Remove the factors x, x+1 and x-1.
-  if Value(psf, 0) = 0 then
-      psf := psf / x;
-  fi;
-  if Value(psf, 1) = 0 then
-      psf := psf/(x-1);
-  fi;
-  if Value(psf, -1) = 0 then
-      psf := psf/(x+1);
-  fi;
+    # Remove the factors x, x+1 and x-1.
+    if Value(psf, 0) = 0 then
+        psf := psf / x;
+    fi;
+    if Value(psf, 1) = 0 then
+        psf := psf/(x-1);
+    fi;
+    if Value(psf, -1) = 0 then
+        psf := psf/(x+1);
+    fi;
 
-#  while cf[1]=0 do
-#    cf:=cf{[2..Length(cf)]};
-#  od;
+#   while cf[1]=0 do
+#   cf:=cf{[2..Length(cf)]};
+#   od;
 
-  # Check if the polynomial is now 1.
-  if Degree(psf) = 0 then
-    return true;
-  fi;
+    # Check if the polynomial is now 1.
+    if Degree(psf) = 0 then
+        return true;
+    fi;
 
-  # Check if the polynomial has even degree.
-  if Degree(psf) mod 2 <> 0 then
-    return false;
-  fi;
+    # Check if the polynomial has even degree.
+    if Degree(psf) mod 2 <> 0 then
+        return false;
+    fi;
 
-  # Check if the polynomial is self-reciprocal.
-  cf:=CoefficientsOfUnivariatePolynomial(psf);
-  if not(cf=Reversed(cf)) then
-    Info(InfoNumSgps,2, "The squarefreee part of the polynomial is not self-reciprocal");
-    return false;
-  fi;
+    # Check if the polynomial is self-reciprocal.
+    cf:=CoefficientsOfUnivariatePolynomial(psf);
+    if not(cf=Reversed(cf)) then
+        Info(InfoNumSgps,2, "The squarefreee part of the polynomial is not self-reciprocal");
+        return false;
+    fi;
 
-  # Compute the number of roots in the unity sphere.
-  # If this number equals the polynomial degree, then it is Kronecker.
-  # Otherwise it isn't.
-  y:=X(Rationals,"y");
-  A:=Resultant(psf,x^2-y*x+1,x);
-  # we convert A to an univariate polynomial
-  A:=Value(A,[x],[1]);
-  if Degree(psf) = 2*NumberOfRootsOfUnivariatePolynomialInInterval(A,-2,2) then
-    return true;
-  else
-    return false;
-  fi;
+    # Compute the number of roots in the unity sphere.
+    # If this number equals the polynomial degree, then it is Kronecker.
+    # Otherwise it isn't.
+    y:=X(Rationals,"y");
+    A:=Resultant(psf,x^2-y*x+1,x);
+    # we convert A to an univariate polynomial
+    A:=Value(A,[x],[1]);
+    if Degree(psf) = 2*NumberOfRootsOfUnivariatePolynomialInInterval(A,-2,2) then
+        return true;
+    else
+        return false;
+    fi;
 end;
 
+#########################################
+# isKroneckerPieter(p)
+# Checks whether a polyonmial is Kronecker or not.
+# It uses the graeffe method.
+#########################################
 isKroneckerGraeffe := function(p)
-  local x, psf, p1, ps, pn, pp, coeffs_ps, factors_graeffe;
+    local x, psf, p1, ps, pn, pp, coeffs_ps, factors_graeffe;
 
-  if not(IsUnivariatePolynomial(p)) then
-    Error("The argument must be a polynomial in one variable");
-  fi;
-
-  if IsZero(p) then
-    return false;
-  fi;
-
-  # Take the largest square free divisor.
-  psf:=p/Gcd(p,Derivative(p));
-  x:=IndeterminateOfLaurentPolynomial(p);
-
-  # Remove the factors x, x+1 and x-1.
-  if Value(psf, 0) = 0 then
-      psf := psf / x;
-  fi;
-  if Value(psf, 1) = 0 then
-      psf := psf/(x-1);
-  fi;
-  if Value(psf, -1) = 0 then
-      psf := psf/(x+1);
-  fi;
-
-  # Check if the polynomial is now 1.
-  if Degree(psf) = 0 then
-    return true;
-  fi;
-
-  # Check if the polynomial has even degree.
-  if Degree(psf) mod 2 <> 0 then
-    return false;
-  fi;
-
-  p1:= GraeffePolynomial(psf);
-  if psf = p1 then
-    return true;
-  fi;
-
-  if Value(psf,-x) = p1 then
-    return true;
-  fi;
-
-  ps := Value(Gcd(Derivative(p1), p1), x^2);
-  pp := Gcd(psf / ps, p1);
-  pn := psf / (ps * pp);
-
-#  if pp = psf then
-#    return true;
-#  fi;
-
-  factors_graeffe := Difference([ps, pp, pn], [1+0*x]);
-
-  if Length(factors_graeffe) = 1 then
-    if IsOne(ps) then
-      return false;
-    else
-      return isKroneckerGraeffe(p1 /  Gcd(p1,Derivative(p1)));
+    if not(IsUnivariatePolynomial(p)) then
+        Error("The argument must be a polynomial in one variable");
     fi;
-  else
-    return ForAll(factors_graeffe, isKroneckerGraeffe);
-  fi;
+
+    if IsZero(p) then
+        return false;
+    fi;
+
+    # Take the largest square free divisor.
+    psf:=p/Gcd(p,Derivative(p));
+    x:=IndeterminateOfLaurentPolynomial(p);
+
+    # Remove the factors x, x+1 and x-1.
+    if Value(psf, 0) = 0 then
+        psf := psf / x;
+    fi;
+    if Value(psf, 1) = 0 then
+        psf := psf/(x-1);
+    fi;
+    if Value(psf, -1) = 0 then
+        psf := psf/(x+1);
+    fi;
+
+    # Check if the polynomial is now 1.
+    if Degree(psf) = 0 then
+        return true;
+    fi;
+
+    # Check if the polynomial has even degree.
+    if Degree(psf) mod 2 <> 0 then
+        return false;
+    fi;
+
+    p1:= GraeffePolynomial(psf);
+    if psf = p1 then
+        return true;
+    fi;
+
+    if Value(psf,-x) = p1 then
+        return true;
+    fi;
+
+    ps := Value(Gcd(Derivative(p1), p1), x^2);
+    pp := Gcd(psf / ps, p1);
+    pn := psf / (ps * pp);
+
+#   if pp = psf then
+#   return true;
+#   fi;
+
+    factors_graeffe := Difference([ps, pp, pn], [1+0*x]);
+
+    if Length(factors_graeffe) = 1 then
+        if IsOne(ps) then
+            return false;
+        else
+            return isKroneckerGraeffe(p1 /  Gcd(p1,Derivative(p1)));
+        fi;
+    else
+        return ForAll(factors_graeffe, isKroneckerGraeffe);
+    fi;
 end;
