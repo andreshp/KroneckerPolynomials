@@ -8,10 +8,10 @@ Algorithms to check whether a polynomial is Kronecker or not. The implementation
 
 ## Empirical results
 
-![][https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_1.png]
-![][https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_2.png]
-![][https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_3.png]
-![][https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_4.png]
+![](https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_1.png)
+![](https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_2.png)
+![](https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_3.png)
+![](https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_4.png)
 
 ## References
 
