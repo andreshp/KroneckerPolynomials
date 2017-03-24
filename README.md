@@ -6,6 +6,13 @@ Algorithms to check whether a polynomial is Kronecker or not. The implementation
 2. Sturm sequence based method. Credits to David Boyd.
 3. Graeffe polynomial based method. See [1](#davenport), page 248.
 
+## Empirical results
+
+![][https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_1.png]
+![][https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_2.png]
+![][https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_3.png]
+![][https://github.com/andreshp/KroneckerPolynomials/blob/master/images/fast_4.png]
+
 ## References
 
 <a name="davenport">1</a>: Effective Tests for Cyclotomic Polynomials, R. J. Bradford and J.H. Davenport, 1988, International Symposium on Symbolic and Algebraic Computation (pp. 244-251). Springer Berlin Heidelberg.
