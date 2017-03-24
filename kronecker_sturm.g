@@ -1,10 +1,10 @@
 #############################################################################
 ##
-#W  sturm_kronecker.g           Andrés Herrera-Poyatos <andreshp9@gmail.com>
+#W  kronecker_sturm.g           Andrés Herrera-Poyatos <andreshp9@gmail.com>
 #W                              Pedro A. Garcia-Sanchez <pedro@ugr.es>
 ##
 ## Algorithm to check whether a polynomial is Kronecker based on
-## the Sturm sequence.
+## the Sturm sequence and Sturm's Theorem.
 ##
 #############################################################################
 
@@ -13,7 +13,7 @@
 #F SturmSequence(f) returns the Sturm sequence of the polynomial f.
 ##
 #########################################################################
-DeclareGlobalFunction("SturmSequence");
+#DeclareGlobalFunction("SturmSequence");
 
 ########################################################################
 ##
@@ -22,7 +22,7 @@ DeclareGlobalFunction("SturmSequence");
 ## It uses the sturm sequence of the polynomial.
 ##
 #########################################################################
-DeclareGlobalFunction("NumberOfRootsOfUnivariatePolynomialInInterval");
+#DeclareGlobalFunction("NumberOfRootsOfUnivariatePolynomialInInterval");
 
 ########################################################################
 ##
@@ -32,21 +32,21 @@ DeclareGlobalFunction("NumberOfRootsOfUnivariatePolynomialInInterval");
 ##   is a product of cyclotomic polynomials
 ##
 #########################################################################
-DeclareGlobalFunction("IsKroneckerPolynomialSturm");
+#DeclareGlobalFunction("IsKroneckerPolynomialSturm");
 
 ########################################################################
 ##
 #F SturmSequence(f) returns the Sturm sequence of the polynomial f.
 ##
 #########################################################################
-SturmSequence := function(p)
+SturmSequence := function(f)
     local sst;
 
-    if not(IsUnivariatePolynomial(p)) then
+    if not(IsUnivariatePolynomial(f)) then
         Error("The argument must be a polynomial in one variable");
     fi;
 
-    sst := [p, Derivative(p)];
+    sst := [f, Derivative(f)];
     while Degree(sst[Length(sst)]) >= 1 do
         Add(sst, -QuotientRemainder(sst[Length(sst)-1],sst[Length(sst)])[2]);
     od;
@@ -60,16 +60,18 @@ end;
 ## It uses the sturm sequence of the polynomial.
 ##
 #########################################################################
-NumberOfRootsOfUnivariatePolynomialInInterval := function(p,a,b)
-    local sst, sgnc, valuesa, valuesb, psf;
+NumberOfRootsOfUnivariatePolynomialInInterval := function(f,a,b)
+    local sst, sgnc, valuesa, valuesb, sf;
 
-    if not(IsUnivariatePolynomial(p)) then
+    if not(IsUnivariatePolynomial(f)) then
         Error("The argument must be a polynomial in one variable");
     fi;
 
     # Take the largest square free divisor.
-    psf:=p/Gcd(p,Derivative(p));
-
+    sf:=f/Gcd(f,Derivative(f));
+    
+    # Counts the number of sign changes in the sequence of numbers given
+    # as argument.
     sgnc := function(numbers)
         local i, n, current_sign, new_sign, numbers_nozeros, count;
         count := 0;
@@ -86,10 +88,11 @@ NumberOfRootsOfUnivariatePolynomialInInterval := function(p,a,b)
         od;
         return count;
     end;
-
-    sst := SturmSequence(p);
-    valuesa := List(sst, psf -> Value(psf, a));
-    valuesb := List(sst, psf -> Value(psf, b));
+    
+    # Apply Sturm theorem to obtain the number of zeroes in [a,b].
+    sst := SturmSequence(sf);
+    valuesa := List(sst, p -> Value(p, a));
+    valuesb := List(sst, p -> Value(p, b));
 
     return sgnc(valuesa) - sgnc(valuesb);
 end;
@@ -101,29 +104,35 @@ end;
 ##   coefficients having all its roots in the unit circunference, equivalently, 
 ##   is a product of cyclotomic polynomials.
 ##
-##   The algorithm was proposed by David Boyd.
+##   The algorithm was proposed by David Boyd. It uses the sturm's algorithm 
+##   to count roots.
+##
 ##   First we obtain the polynomial sf as the largest square free factor of f.
 ##   Then we check whether x, x-1 or x+1 divide sf. If it is the case,
-##   then we remove these factors from sf. Afterwards if deg sf is 0, then
-##   f is Kronecker. If deg sf is not even, then f is not Kronecker.
-##   
-##   It uses the sturm's algorithm to count roots along with a variable's 
-##   change in order to count the roots in the unit circle.
+##   then we remove these factors from sf. Afterwards, let n be the degree of sf. 
+##   If n is 0, then  f is Kronecker. If n is not even, then f is not Kronecker.
+##   If sf is not Self-Reciprocal then f is not Kronecker neither.
+##   Now we can write uniquely sf(x) = x^(n/2) A(x+1/x), where A is a polynomial
+##   of degree n/2. A can be computed as the resultant of sf and x^2-y*x+1.
+##   Note that A has half as many roots in [-2,2] as sf has roots in the unit 
+##   circle. Now we use the sturm sequence algorithm to determine the 
+##   number of roots of A in [-2,2]. f is Kronecker if and only if this
+##   number equals n.
 #########################################################################
 IsKroneckerPolynomialSturm := function(f)
-    if not(IsUnivariatePolynomial(p)) then
+    local x, y, A, sf;
+    if not(IsUnivariatePolynomial(f)) then
         Error("The argument must be a polynomial in one variable");
     fi;
-                         
-    if IsZero(p) then
+
+    if IsZero(f) then
         return false;
     fi;
 
-    local n, x, y, cf, A, sf;   
-    x := IndeterminateOfLaurentPolynomial(p);
+    x := IndeterminateOfLaurentPolynomial(f);
 
     # Take the largest square free divisor.
-    sf := p / Gcd(p, Derivative(p));
+    sf := f / Gcd(f, Derivative(f));
  
     # Remove the factors x, x+1 and x-1.
     if Value(sf, 0) = 0 then
@@ -136,7 +145,7 @@ IsKroneckerPolynomialSturm := function(f)
         sf := sf/(x+1);
     fi;
     
-    # Check if the polynomial is now 1.
+    # Check if the polynomial is constant.
     if Degree(sf) = 0 then
         return true;
     fi;
@@ -145,17 +154,14 @@ IsKroneckerPolynomialSturm := function(f)
     if Degree(sf) mod 2 <> 0 or not(IsSelfReciprocalUnivariatePolynomial(sf)) then
         return false;
     fi;
-    
-    # Compute the number of roots in the unity sphere.
+
+    # Compute the number of roots in the unit circunference.
     # If this number equals the polynomial degree, then it is Kronecker.
     # Otherwise it isn't.
-    y:=X(Rationals,"y");
-    A:=Resultant(sf,x^2-y*x+1,x);
+    y:=X(Rationals, "y");
+    A:=Resultant(sf, x^2-y*x+1, x);
     # we convert A to an univariate polynomial
-    A:=Value(A,[x],[1]);
-    if Degree(sf) = 2*NumberOfRootsOfUnivariatePolynomialInInterval(A,-2,2) then
-        return true;
-    else
-        return false;
-    fi;
+    A:=Value(A, [x], [1]);
+
+    return Degree(sf) = 2*NumberOfRootsOfUnivariatePolynomialInInterval(A,-2,2);
 end;
