@@ -56,33 +56,38 @@ IsKroneckerPolynomialGraeffe := function(f)
         return false;
     fi;
     
-    
+    # Apply the graeffe method to sf. Note that if sf(+-x) = f1, then
+    # sf is Kronecker.
     f1:= GraeffePolynomial(sf);
     if sf = f1 then
         return true;
     fi;
-
     if Value(sf,-x) = f1 then
         return true;
     fi;
-
+    
+    # Assume that sf is Kronecker.
+    # Find the descomposition of sf = fs*fp*fn, where:
+    # - fs is the part of sf which verifies Graeffe(fs) = (g(x))^2
+    # - fp is the part of sf which verifies Graeffe(fs) = fs.
+    # - fn is the part of sf which vefifies Graeffe(fs)(x) = fs(-x).
     fs := Value(Gcd(Derivative(f1), f1), x^2);
     fp := Gcd(sf / fs, f1);
     fn := sf / (fs * fp);
-
-#   if fp = sf then
-#   return true;
-#   fi;
 
     factors_graeffe := Difference([fs, fp, fn], [1+0*x]);
 
     if Length(factors_graeffe) = 1 then
         if IsOne(fs) then
+            # We must have f = fp or f = fs, but we obtained Graeffe(sf) != sf, 
+            # Graeffe(sf) != sf(-x), a contradiction. Hence sf is not Kronecker.
             return false;
         else
+            # sf is Kronecker if and only if f1 / fs(\sqrt{x}) is Kronecker.
             return IsKroneckerPolynomialGraeffe(f1 /  Gcd(f1,Derivative(f1)));
         fi;
     else
+        # sf is Kronecker if and only if fs, fp and fn are Kronecker.
         return ForAll(factors_graeffe, IsKroneckerPolynomialGraeffe);
     fi;
 end;
