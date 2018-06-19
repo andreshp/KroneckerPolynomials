@@ -1,10 +1,11 @@
-n,NumerisalSgp,Pieter,Sturm,Graeffe
-1,16,0,0,0
-2,8,0,0,0
-3,4,0,0,0
-4,4,0,0,0
-5,8,0,0,0
-6,16,0,4,0
-7,32,0,0,0
-8,104,0,0,0
-9,484,0,4,0
+n,NumerisalSgp,Pieter,Pieter Improved,Sturm,Graeffe
+1,0,0,0,0,0
+Error in current algorithm, the polynomial x^2-2 is Kronecker.2,0,0,0,4,0
+Error in current algorithm, the polynomial x^4-2 is Kronecker.3,0,0,0,0,0
+Error in current algorithm, the polynomial x^8-2 is Kronecker.4,0,0,0,0,0
+Error in current algorithm, the polynomial x^16-2 is Kronecker.5,0,0,0,0,0
+Error in current algorithm, the polynomial x^32-2 is Kronecker.6,0,0,0,0,0
+Error in current algorithm, the polynomial x^64-2 is Kronecker.7,0,0,0,0,0
+Error in current algorithm, the polynomial x^128-2 is Kronecker.8,0,0,0,0,0
+Error in current algorithm, the polynomial x^256-2 is Kronecker.9,0,0,0,0,4
+Error in current algorithm, the polynomial x^512-2 is Kronecker.

@@ -1,34 +1,34 @@
 #############################################################################
 #
-#  test_kronecke_all_1.sh        Andrés Herrera-Poyatos <andreshp9@gmail.com>
+#  test_kronecke_all_pedro.sh        Andrés Herrera-Poyatos <andreshp9@gmail.com>
 #                                Pedro A. Garcia-Sanchez <pedro@ugr.es>
 #
-# Test the kronecker algorithms with the polynomial x^{2^n}-1.
+# Test the kronecker algorithms.
 #
 #############################################################################
 
-gap -r -b -q << EOI
+gap.sh -r -b -q << EOI
 LoadPackage("num");;
 Read("kronecker_pieter.g");;
 Read("kronecker_sturm.g");;
 Read("kronecker_graeffe.g");;
 
 x := X(Rationals, "x");;
-m := 9;;
+m := 200;;
 
-Print("n,NumerisalSgp,Pieter,Sturm,Graeffe\n");
+Print("n,Pieter,Pieter Improved,Sturm,Graeffe\n");
 
 for i in [1..m] do
     Print(i);
     Print(",");
-    p := x^(2^i)-1;
+    p := 1 - x + x^i - x^(2*i-1) + x^(2*i);
     start := Runtime();
-    sol_current := IsKroneckerPolynomial(p);
+    sol_pieter := IsKroneckerPolynomialPieter(p);
     total:=Runtime()-start;
     Print(total);
     Print(",");
     start := Runtime();
-    sol_pieter := IsKroneckerPolynomialPieter(p);
+    sol_pieter_imp := IsKroneckerPolynomialPieterImproved(p);
     total:=Runtime()-start;
     Print(total);
     Print(",");
@@ -42,18 +42,6 @@ for i in [1..m] do
     total:=Runtime()-start;
     Print(total);
     Print("\n");
-    if not(sol_current) then
-        Print("Error in current algorithm, the polynomial ", p, " is Kronecker.");
-    fi;
-    if not(sol_pieter) then
-        Print("Error in current algorithm, the polynomial ", p, " is Kronecker.");
-    fi;
-    if not(sol_sturm) then
-        Print("Error in current algorithm, the polynomial ", p, " is Kronecker.");
-    fi;
-    if not(sol_graeffe) then
-        Print("Error in current algorithm, the polynomial ", p, " is Kronecker.");
-    fi;
 od;
 
 quit;

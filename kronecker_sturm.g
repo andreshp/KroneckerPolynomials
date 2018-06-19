@@ -34,6 +34,38 @@
 #########################################################################
 #DeclareGlobalFunction("IsKroneckerPolynomialSturm");
 
+APolynomialResultant := function(p)
+    local A, x, y;    
+    x := IndeterminateOfLaurentPolynomial(p);
+    y:=X(Rationals, "y");
+    A:=Resultant(p, x^2-y*x+1, x);
+    # we convert A to an univariate polynomial
+    A:=Value(A, [x], [1]);
+    return A;    
+end;
+
+
+APolynomial := function(p)
+    local q, a, b, A, n, d, k, j, x;    
+    x := IndeterminateOfLaurentPolynomial(p);
+    n := Degree(p) / 2;
+    a := CoefficientsOfUnivariatePolynomial(p){[n+1 .. 2*n+1]};
+    A := 0;    
+    for j in [0..n-2] do
+        d := n-j;        
+        b := [1..d];
+        b[d] := a[d+1];
+        b[d-1] := a[d];
+        for k in Reversed([1..d-2]) do
+            b[k] := a[k+1] - b[k+2];        
+        od;
+        A := A + (a[1]-2*b[2])*x^j;        
+        a := b;
+    od;
+    A := A + a[1]*x^(n-1) + a[2]*x^n;    
+    return A;    
+end;
+
 ########################################################################
 ##
 #F SturmSequence(f) returns the Sturm sequence of the polynomial f.
@@ -155,13 +187,7 @@ IsKroneckerPolynomialSturm := function(f)
         return false;
     fi;
 
-    # Compute the number of roots in the unit circunference.
-    # If this number equals the polynomial degree, then it is Kronecker.
-    # Otherwise it isn't.
-    y:=X(Rationals, "y");
-    A:=Resultant(sf, x^2-y*x+1, x);
-    # we convert A to an univariate polynomial
-    A:=Value(A, [x], [1]);
+    A:= APolynomial(sf);
 
     return Degree(sf) = 2*NumberOfRootsOfUnivariatePolynomialInInterval(A,-2,2);
 end;

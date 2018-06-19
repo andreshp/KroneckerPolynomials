@@ -8,7 +8,7 @@
 #
 #############################################################################
 
-gap -r -b -q << EOI
+gap.sh -r -b -q << EOI
 LoadPackage("num");;
 Read("kronecker_pieter.g");;
 Read("kronecker_sturm.g");;
@@ -17,14 +17,14 @@ Read("kronecker_graeffe.g");;
 x := X(Rationals, "x");;
 m := 11;;
 
-Print("n,Pieter,Sturm,Graeffe\n");
+Print("n,Pieter (improved),Boyd,Graeffe (improved)\n");
 
 for i in [1..m] do
     Print(i);
     Print(",");
     p := x^(2^i)-1;
     start := Runtime();
-    sol_pieter := IsKroneckerPolynomialPieter(p);
+    sol_pieter := IsKroneckerPolynomialPieterImproved(p);
     total:=Runtime()-start;
     Print(total);
     Print(",");
@@ -39,13 +39,13 @@ for i in [1..m] do
     Print(total);
     Print("\n");
     if not(sol_pieter) then
-        Print("Error in current algorithm, the polynomial ", p, " is Kronecker.");
+        Print("Error in Pieter algorithm, the polynomial ", p, " is Kronecker.");
     fi;
     if not(sol_sturm) then
-        Print("Error in current algorithm, the polynomial ", p, " is Kronecker.");
+        Print("Error in Boyd algorithm, the polynomial ", p, " is Kronecker.");
     fi;
     if not(sol_graeffe) then
-        Print("Error in current algorithm, the polynomial ", p, " is Kronecker.");
+        Print("Error in Graeffe algorithm, the polynomial ", p, " is Kronecker.");
     fi;
 od;
 

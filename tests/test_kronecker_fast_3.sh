@@ -8,23 +8,23 @@
 #
 #############################################################################
 
-gap -r -b -q << EOI
+gap.sh -r -b -q << EOI
 LoadPackage("num");;
 Read("kronecker_pieter.g");;
 Read("kronecker_sturm.g");;
 Read("kronecker_graeffe.g");;
 
 x := X(Rationals, "x");;
-m := 250;;
+m := 10;;
 
-Print("n,Pieter,Sturm,Graeffe\n");
+Print("n,Pieter (improved),Sturm,Graeffe (improved)\n");
 
 for i in [1..m] do
     Print(i);
     Print(",");
-    p := CyclotomicPolynomial(Rationals, i);
+    p := CyclotomicPolynomial(Rationals, 2^i);
     start := Runtime();
-    sol_pieter := IsKroneckerPolynomialPieter(p);
+    sol_pieter := IsKroneckerPolynomialPieterImproved(p);
     total:=Runtime()-start;
     Print(total);
     Print(",");
